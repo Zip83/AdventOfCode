@@ -1,4 +1,4 @@
-﻿using System;
+﻿using AdventOfCode.Y2018;
 
 namespace AdventOfCode
 {
@@ -6,7 +6,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            var task = new Day6();
+            var task = new Day5();
             task.execute(1);
         }
     }

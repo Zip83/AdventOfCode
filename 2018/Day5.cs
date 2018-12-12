@@ -1,12 +1,11 @@
 using System;
-using System.IO;
 
-namespace AdventOfCode
+namespace AdventOfCode.Y2018
 {
     public class Day5
     {
-        private const string FILENAME = "inputs/5.txt";
-        private const string FILENAME_EXAMPLE = "inputs/5_example.txt";
+        private const string FILENAME = "2018/inputs/5.txt";
+        private const string FILENAME_EXAMPLE = "2018/inputs/5_example.txt";
 
         private const int FROM = 65; // A
         private const int TO = 90; // Z
