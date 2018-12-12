@@ -7,7 +7,7 @@ namespace AdventOfCode
         static void Main(string[] args)
         {
             var task = new Day5();
-            task.execute(1);
+            task.execute(2);
         }
     }
 }
