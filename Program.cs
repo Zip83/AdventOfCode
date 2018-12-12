@@ -6,8 +6,8 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            var task = new Day5();
-            task.execute(2);
+            var task = new Day6();
+            task.execute(1);
         }
     }
 }

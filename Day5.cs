@@ -26,7 +26,7 @@ namespace AdventOfCode
 
         private void task1()
         {
-            var line = readFile(FILENAME);
+            var line = FileUtil.readLine(FILENAME);
             var l = line.Length;
             do
             {
@@ -54,7 +54,7 @@ namespace AdventOfCode
 
         private void task2()
         {
-            var input = readFile(FILENAME);
+            var input = FileUtil.readLine(FILENAME);
             var min = Int32.MaxValue;
             string line = "";
             for (int ch = FROM; ch <= TO; ch++)
@@ -96,14 +96,6 @@ namespace AdventOfCode
             Console.WriteLine(min);
         }
 
-        private string readFile(string fileName)
-        {
-            StreamReader file = new StreamReader(fileName);
-            var line = file.ReadLine();  
-            Console.WriteLine(line);
-            file.Close();
-
-            return line;
-        }
+        
     }
 }
