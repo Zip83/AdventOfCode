@@ -1,31 +1,18 @@
 using System;
 
-namespace AdventOfCode.Y2018
+namespace AdventOfCode._2018
 {
-    public class Day5
+    public class Day5 : ADay
     {
-        private const string FILENAME = "2018/inputs/5.txt";
-        private const string FILENAME_EXAMPLE = "2018/inputs/5_example.txt";
+        private const string Filename = "2018/inputs/5.txt";
+        private const string FileNameExample = "2018/inputs/5_example.txt";
 
-        private const int FROM = 65; // A
-        private const int TO = 90; // Z
-        
-        public void execute(int taskId)
-        {
-            switch (taskId)
-            {
-                case 1:
-                    task1();
-                    break;
-                case 2:
-                    task2();
-                    break;
-            }
-        }
+        private const int From = 65; // A
+        private const int To = 90; // Z
 
-        private void task1()
+        protected override void Task1()
         {
-            var line = FileUtil.readLine(FILENAME);
+            var line = FileUtil.readLine(Filename);
             var l = line.Length;
             do
             {
@@ -51,14 +38,13 @@ namespace AdventOfCode.Y2018
             Console.WriteLine(line.Length);
         }
 
-        private void task2()
+        protected override void Task2()
         {
-            var input = FileUtil.readLine(FILENAME);
+            var input = FileUtil.readLine(Filename);
             var min = Int32.MaxValue;
-            string line = "";
-            for (int ch = FROM; ch <= TO; ch++)
+            for (int ch = From; ch <= To; ch++)
             {
-                line = new string(input.ToCharArray());
+                var line = new string(input.ToCharArray());
                 var c = Convert.ToChar(ch);
                 Console.WriteLine(c);
                 line = line.Replace(c.ToString(), "");

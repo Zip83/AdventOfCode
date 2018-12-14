@@ -1,12 +1,12 @@
-﻿using AdventOfCode.Y2018;
+﻿using AdventOfCode._2018;
 
 namespace AdventOfCode
 {
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var task = new Day5();
+            var task = new Day6();
             task.execute(1);
         }
     }
