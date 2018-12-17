@@ -6,17 +6,21 @@ namespace AdventOfCode._2018
 {
     public class Day6 : ADay
     {
-        private const string FileName = "2018/inputs/6.txt";
-        private const string FileNameExample = "2018/inputs/6_example.txt";
+        protected override string FileName => "2018/puzzles/inputs/06.txt";
+        protected override string FileNameExample => "2018/inputs/examples/06.txt";
         private const char SameDistanceChar = '.';
         
-        protected override void Task1()
+        public Day6(bool test) : base(test)
         {
-            var matrix = ReadInput(FileNameExample);
+        }
+        
+        protected override void Task1(string fileName)
+        {
+            var matrix = ReadInput(fileName);
             var size = initSize(matrix);
 
             var candidates = new Dictionary<int, Dictionary<int, char>>();
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 50; i++)
             {
                 foreach (var columns in matrix)
                 {
@@ -44,9 +48,11 @@ namespace AdventOfCode._2018
 
                 candidates = newCan;
             }
+            
+            Console.WriteLine("***");
         }
 
-        protected override void Task2()
+        protected override void Task2(string fileName)
         {
             throw new NotImplementedException();
         }

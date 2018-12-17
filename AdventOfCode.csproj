@@ -11,4 +11,8 @@
       <Folder Include="2017\inputs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="2018\puzzles\inputs\10.txt" />
+    </ItemGroup>
+
 </Project>

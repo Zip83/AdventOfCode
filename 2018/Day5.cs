@@ -4,15 +4,19 @@ namespace AdventOfCode._2018
 {
     public class Day5 : ADay
     {
-        private const string Filename = "2018/inputs/5.txt";
-        private const string FileNameExample = "2018/inputs/5_example.txt";
-
         private const int From = 65; // A
         private const int To = 90; // Z
 
-        protected override void Task1()
+        protected override string FileName => "2018/puzzles/inputs/05.txt";
+        protected override string FileNameExample => "2018/puzzles/examples/05.txt";
+        
+        public Day5(bool test) : base(test)
         {
-            var line = FileUtil.readLine(Filename);
+        }
+
+        protected override void Task1(string fileName)
+        {
+            var line = FileUtil.readLine(fileName);
             var l = line.Length;
             do
             {
@@ -38,9 +42,9 @@ namespace AdventOfCode._2018
             Console.WriteLine(line.Length);
         }
 
-        protected override void Task2()
+        protected override void Task2(string fileName)
         {
-            var input = FileUtil.readLine(Filename);
+            var input = FileUtil.readLine(fileName);
             var min = Int32.MaxValue;
             for (int ch = From; ch <= To; ch++)
             {
@@ -80,7 +84,5 @@ namespace AdventOfCode._2018
 
             Console.WriteLine(min);
         }
-
-        
     }
 }
