@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 
 namespace AdventOfCode._2018
 {
@@ -9,7 +11,9 @@ namespace AdventOfCode._2018
         protected override string FileName => "2018/puzzles/inputs/17.txt";
         protected override string FileNameExample => "2018/puzzles/examples/17.txt";
 
-        private static readonly Coords WaterSourceCoords = new Coords(500, 0);
+        private static Coords WaterSourceCoords = new Coords(500, 0);
+        private Ground[,] grounds;
+        private Stack<Operation> stack = new Stack<Operation>();
 
         public Day17(bool test) : base(test)
         {
@@ -18,8 +22,35 @@ namespace AdventOfCode._2018
         protected override void Task1(string fileName)
         {
             string[] inputs = FileUtil.readAllLines(fileName);
-            Ground[,] grounds = parseInput(inputs);
-            print(grounds);
+            grounds = ParseInput(inputs);
+            print();
+
+            GenerateWater();
+            var file = File.OpenWrite("2018/puzzles/inputs/17_result.txt");
+            for (int y = 0; y < grounds.GetLength(1); y++)
+            {
+                for (int x = 0; x < grounds.GetLength(0); x++)
+                {
+                    file.WriteByte((byte)(char)grounds[x, y]);
+                }
+                file.WriteByte((byte)'\n');
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+            Count();
+        }
+
+        private void Count()
+        {
+            var count = 0;
+            foreach (var g in grounds)
+            {
+                if (g == Ground.Reservoir || g == Ground.Passed)
+                {
+                    count++;
+                }
+            }
+            Console.WriteLine(count);
         }
 
         protected override void Task2(string fileName)
@@ -27,11 +58,12 @@ namespace AdventOfCode._2018
             throw new System.NotImplementedException();
         }
 
-        private Ground[,] parseInput(string[] inputs)
+        private Ground[,] ParseInput(string[] inputs)
         {
             var ground = initGround(inputs, out var bounds);
             int xCorrection = bounds.Left - 1;
-            ground[WaterSourceCoords.x - xCorrection, WaterSourceCoords.y] = Ground.WaterSpring;
+            WaterSourceCoords.x -= xCorrection;
+            ground[WaterSourceCoords.x, WaterSourceCoords.y] = Ground.WaterSpring;
             foreach (var line in inputs)
             {
                 var coords = ParseCoords(line);
@@ -43,6 +75,165 @@ namespace AdventOfCode._2018
             }
 
             return ground;
+        }
+
+        private void GenerateWater()
+        {
+            stack.Push(new Operation(Method.FallDown, WaterSourceCoords));
+            while (stack.Count > 0)
+            {
+                var operation = stack.Pop();
+                switch (operation.method)
+                {
+                    case Method.FallDown:
+                        FallDown(operation.coord);
+                        break;
+                    case Method.FillWithPassed:
+                        FillWithPassed(operation.coord);
+                        break;
+                }
+                print();
+            }
+        }
+
+        private void FallDown(Coords coord)
+        {
+            if (coord.y + 1 >= grounds.GetLength(1) || grounds[coord.x, coord.y + 1] == Ground.Passed)
+            {
+                return;
+            }
+
+            var pos = coord.AddY();
+            var ground = grounds[pos.x, pos.y];
+            switch (ground)
+            {
+                case Ground.Passed:
+                    stack.Push(new Operation(Method.FallDown, pos));
+                    break;
+                case Ground.Reservoir:
+                    stack.Push(new Operation(Method.FallDown, coord.SubY()));
+                    stack.Push(new Operation(Method.FillWithPassed, coord));
+                    break;
+                case Ground.Sand:
+                    grounds[pos.x, pos.y] = Ground.Passed;
+                    print();
+                    stack.Push(new Operation(Method.FallDown, pos));
+                    break;
+                case Ground.Clay:
+                    stack.Push(new Operation(Method.FallDown, coord.SubY()));
+                    stack.Push(new Operation(Method.FillWithPassed, coord));
+                    print();
+                    break;
+            }
+        }
+
+        private bool SpreadLeft(Coords coord)
+        {
+            return Spread(coord, Direction.Left);
+        }
+
+        private bool SpreadRight(Coords coord)
+        {
+            return Spread(coord, Direction.Right);
+        }
+
+        private bool Spread(Coords coord, Direction dir)
+        {
+            var pos = dir == Direction.Left ? coord.SubX() : coord.AddX();
+            Ground ground;
+            try
+            {
+                ground = grounds[pos.x, pos.y];
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                return false;
+            }
+
+            switch (ground)
+            {
+                case Ground.Passed:
+                case Ground.Reservoir:
+                    return Spread(pos, dir);
+                case Ground.Sand:
+                    var bottom = grounds[coord.x, coord.y + 1];
+                    if (bottom == Ground.Sand || bottom == Ground.Passed)
+                    {
+                        print();
+                        stack.Push(new Operation(Method.FallDown, coord));
+                        return false;
+                    }
+                    grounds[pos.x, pos.y] = Ground.Passed;
+                    print();
+                    return true;
+                case Ground.Clay:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        private void FillWithPassed(Coords coord)
+        {
+            int spreaded;
+            do
+            {
+                spreaded = 0;
+                if (SpreadLeft(coord))
+                {
+                    spreaded++;
+                }
+                if (SpreadRight(coord))
+                {
+                    spreaded++;
+                }
+
+                if (spreaded == 0)
+                {
+                    grounds[coord.x, coord.y] = Ground.Passed;
+                }
+            } while (spreaded > 0);
+            print();
+            FillWithReservoir(coord);
+        }
+
+        private void FillWithReservoir(Coords coord)
+        {
+            var clayOnRight = -1;
+            var clayOnLeft = -1;
+            for(int i = coord.x; i < grounds.GetLength(0); i++)
+            {
+                if (grounds[i, coord.y] == Ground.Sand)
+                {
+                    break;
+                }
+                if (grounds[i, coord.y] == Ground.Clay && grounds[i, coord.y + 1] != Ground.Sand)
+                {
+                    clayOnRight = i - 1;
+                    break;
+                }
+            }
+            for(int i = coord.x; i >= 0; i--)
+            {
+                if (grounds[i, coord.y] == Ground.Sand)
+                {
+                    break;
+                }
+                if (grounds[i, coord.y] == Ground.Clay && grounds[i, coord.y + 1] != Ground.Sand)
+                {
+                    clayOnLeft = i + 1;
+                    break;
+                }
+            }
+
+            if (clayOnLeft > -1 && clayOnRight > -1)
+            {
+                for(int i = clayOnLeft; i <= clayOnRight; i++)
+                {
+                    grounds[i, coord.y] = Ground.Reservoir;
+                }
+            }
+            print();
         }
 
         private Ground[,] initGround(string[] inputs, out Rectangle bounds)
@@ -64,8 +255,8 @@ namespace AdventOfCode._2018
         private Rectangle GetBounds(string[] inputs)
         {
             int minX = Int32.MaxValue,
-                maxX = WaterSourceCoords.x,
-                maxY = WaterSourceCoords.y;
+                maxX = Int32.MinValue,
+                maxY = Int32.MinValue;
             foreach (var line in inputs)
             {
                 var coords = ParseCoords(line);
@@ -133,8 +324,9 @@ namespace AdventOfCode._2018
             return result;
         }
 
-        private void print(Ground[,] grounds)
+        private void print()
         {
+            return;
             for (int y = 0; y < grounds.GetLength(1); y++)
             {
                 for (int x = 0; x < grounds.GetLength(0); x++)
@@ -143,6 +335,7 @@ namespace AdventOfCode._2018
                 }
                 Console.WriteLine();
             }
+            Console.WriteLine();
         }
 
         private struct Coords
@@ -154,6 +347,27 @@ namespace AdventOfCode._2018
                 x = p1;
                 y = p2;
             }
+
+            public Coords AddX()
+            {
+                return new Coords(x + 1, y);
+            }
+
+            public Coords AddY()
+            {
+                return new Coords(x, y + 1);
+            }
+
+            public Coords SubX()
+            {
+                return new Coords(x - 1, y);
+            }
+
+            public Coords SubY()
+            {
+                return new Coords(x, y - 1);
+            }
+
         }
 
         private enum Ground
@@ -163,6 +377,30 @@ namespace AdventOfCode._2018
             Clay = '#',
             Reservoir = '~',
             Passed = '|'
+        }
+
+        private enum Direction
+        {
+            Left,
+            Right
+        }
+
+        private enum Method
+        {
+            FallDown,
+            FillWithPassed
+        }
+
+        private struct Operation
+        {
+            public Method method;
+            public Coords coord;
+
+            public Operation(Method method, Coords coords)
+            {
+                this.method = method;
+                this.coord = coords;
+            }
         }
     }
 }
