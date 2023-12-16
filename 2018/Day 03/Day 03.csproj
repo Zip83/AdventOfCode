@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <RootNamespace>AdventOfCode._2018</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ContentWithTargetPath Include="*.txt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <TargetPath>%(RecursiveDir)\%(Filename)%(Extension)</TargetPath>
+        </ContentWithTargetPath>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Shared\Shared.csproj"/>
+    </ItemGroup>
+</Project>
