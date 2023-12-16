@@ -1,6 +1,6 @@
 using AdventOfCode.Shared;
 
-namespace Day_05;
+namespace AdventOfCode._2018;
 
 public class Day05 : Day
 {
