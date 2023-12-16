@@ -1,0 +1,55 @@
+{
+  "author": "Josef Sedlačík",
+  "name": "Advent of Code",
+  "identity": "AoC",
+  "shortName": "aoc",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "AoC",
+  "preferNameDirectory": true,
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            ".idea/**",
+            ".vscode/**",
+            ".vs/**",
+            ".DS_Store/**",
+            "**/.idea/**",
+            "**/.vscode/**",
+            "**/.vs/**",
+            "**/.DS_Store/**",
+            "bin/**",
+            "obj/**",
+            ".template.config/**"
+          ]
+        }
+      ]
+    }
+  ],
+  "symbols":{
+    "Year":{
+      "type": "parameter",
+      "datatype":"int"
+    },
+    "ThisYear":{
+      "type": "generated",
+      "generator": "now",
+      "parameters": {
+        "format": "yyyy"
+      }
+    },
+    "YearReplacer": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "Year",
+        "fallbackVariableName": "ThisYear"
+      },
+      "replaces": "1970"
+    }
+  }
+}
