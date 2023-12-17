@@ -6,7 +6,7 @@ namespace AdventOfCode._2023.Tests;
 public class Day13Tests
 {
     [TestCaseSource(nameof(_getTask1ResultTestData))]
-    public void GetTask1Result(string[] input, long expectedResult)
+    public void GetTask1ResultTest(string[] input, long expectedResult)
     {
         var day = new Day13();
         var result = day.GetTask1Result(input);
@@ -85,5 +85,67 @@ public class Day13Tests
             },
             11
         }
+    };
+    
+    [TestCaseSource(nameof(_getTask2ResultTestData))]
+    public void GetTask2ResultTest(string[] input, long expectedResult)
+    {
+        var day = new Day13();
+        var result = day.GetTask2Result(input);
+        result.Should().Be(expectedResult);
+    }
+
+    private static object[] _getTask2ResultTestData =
+    {
+        new object[]
+        {
+            new[]
+            {
+                "#.##..##.",
+                "..#.##.#.",
+                "##......#",
+                "##......#",
+                "..#.##.#.",
+                "..##..##.",
+                "#.#.##.#.",
+            },
+            300
+        },
+        new object[]
+        {
+            new[]
+            {
+                "#...##..#",
+                "#....#..#",
+                "..##..###",
+                "#####.##.",
+                "#####.##.",
+                "..##..###",
+                "#....#..#",
+            },
+            100
+        },
+        new object[]
+        {
+            new[]
+            {
+                "#.##..##.",
+                "..#.##.#.",
+                "##......#",
+                "##......#",
+                "..#.##.#.",
+                "..##..##.",
+                "#.#.##.#.",
+                "",
+                "#...##..#",
+                "#....#..#",
+                "..##..###",
+                "#####.##.",
+                "#####.##.",
+                "..##..###",
+                "#....#..#",
+            },
+            400
+        },
     };
 }

@@ -13,7 +13,7 @@ public class Day13 : Day
         Console.WriteLine($"RESULT#2: {instance.GetTask2Result()}");
     }
 
-    public override long GetTask1Result(string[] input)
+    private List<string[]> ParseInput(string[] input)
     {
         var blocks = new List<string[]>();
         var block = new List<string>();
@@ -35,22 +35,29 @@ public class Day13 : Day
             blocks.Add(block.ToArray());
         }
 
+        return blocks;
+    }
+
+    public override long GetTask1Result(string[] input)
+    {
+        var blocks = ParseInput(input);
+
         var result = 0L;
         foreach (var list in blocks)
         {
-            result += TryFindReflection(list);
+            result += TryFindReflection(list, false);
         }
         return result;
     }
 
-    private long TryFindReflection(string[] block)
+    private long TryFindReflection(string[] block, bool useSmudge)
     {
-        var result = TryFindHorizontalReflection(block);
+        var result = TryFindHorizontalReflection(block, useSmudge);
         if (result == 0)
         {
-            Console.WriteLine("Try find vertical reflection.");
-            Console.WriteLine();
-            result = TryFindVerticalReflection(block);
+            // Console.WriteLine("Try find vertical reflection.");
+            // Console.WriteLine();
+            result = TryFindVerticalReflection(block, useSmudge);
         }
         else
         {
@@ -60,13 +67,27 @@ public class Day13 : Day
         return result;
     }
 
-    private long TryFindHorizontalReflection(string[] block)
+    private static int GetLineDiff(string row1, string row2)
     {
-        foreach (var s in block)
+        var diff = 0;
+        for (var i = 0; i < row1.Length; i++)
         {
-            Console.WriteLine(s);
+            if (row1[i] != row2[i])
+            {
+                diff++;
+            }
         }
-        Console.WriteLine();
+
+        return diff;
+    }
+
+    private long TryFindHorizontalReflection(string[] block, bool useSmudge)
+    {
+        // foreach (var s in block)
+        // {
+        //     Console.WriteLine(s);
+        // }
+        // Console.WriteLine();
         
         var result = 0;
         for (var i = 0; i < block.Length; i++)
@@ -78,11 +99,17 @@ public class Day13 : Day
             }
             
             var row2 = block[i + 1];
-            if (row1 != row2)
+            var diff = GetLineDiff(row1, row2);
+            if (useSmudge && diff > 1)
+            {
+                continue;
+            } 
+            if (!useSmudge && diff > 0)
             {
                 continue;
             }
 
+            var smuggedUsed = false;
             // check, if it is really reflection
             var isReflection = true;
             for (var k = 0; i - k >= 0; k++)
@@ -94,7 +121,25 @@ public class Day13 : Day
                 }
 
                 var checkRow2 = block[i + 1 + k];
-                if (checkRow1 != checkRow2)
+                diff = GetLineDiff(checkRow1, checkRow2);
+                if (useSmudge)
+                {
+                    if (diff == 0)
+                    {
+                        continue;
+                    } 
+                    
+                    if (diff == 1 && !smuggedUsed)
+                    {
+                        smuggedUsed = true;
+                        continue;
+                    }
+                    
+                    isReflection = false;
+                    break;
+                } 
+                
+                if (diff > 0)
                 {
                     isReflection = false;
                     break;
@@ -103,8 +148,13 @@ public class Day13 : Day
 
             if (isReflection)
             {
-                Console.WriteLine($"Reflection found at {i + 1} / {i + 2}.");
-                Console.WriteLine();
+                if (useSmudge && !smuggedUsed)
+                {
+                    continue;
+                }
+                
+                // Console.WriteLine($"Reflection found at {i + 1} / {i + 2}.");
+                // Console.WriteLine();
                 result = i + 1;
                 break;
             }
@@ -118,7 +168,7 @@ public class Day13 : Day
         return result;
     }
 
-    private long TryFindVerticalReflection(string[] block)
+    private long TryFindVerticalReflection(string[] block, bool useSmudge)
     {
         var transposed = new Dictionary<int, StringBuilder>();
         for (var i = 0; i < block.Length; i++)
@@ -135,11 +185,18 @@ public class Day13 : Day
             }
         }
 
-        return TryFindHorizontalReflection(transposed.Select(pair => pair.Value.ToString()).ToArray());
+        return TryFindHorizontalReflection(transposed.Select(pair => pair.Value.ToString()).ToArray(), useSmudge);
     }
 
     public override long GetTask2Result(string[] input)
     {
-        throw new NotImplementedException();
+        var blocks = ParseInput(input);
+
+        var result = 0L;
+        foreach (var list in blocks)
+        {
+            result += TryFindReflection(list, true);
+        }
+        return result;
     }
 }
