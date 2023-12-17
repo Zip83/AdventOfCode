@@ -4,7 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>AdventOfCode._2019.Tests</RootNamespace>
+        <RootNamespace>AdventOfCode._2023.Tests</RootNamespace>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -22,6 +22,7 @@
       <ProjectReference Include="..\Day 09\Day 09.csproj" />
       <ProjectReference Include="..\Day 11\Day 11.csproj" />
       <ProjectReference Include="..\Day 12\Day 12.csproj" />
+      <ProjectReference Include="..\Day 13\Day 13.csproj" />
     </ItemGroup>
 
 </Project>

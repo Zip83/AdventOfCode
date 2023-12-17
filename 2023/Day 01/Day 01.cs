@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using AdventOfCode.Shared;
 
-namespace AdventOfCode._2019;
+namespace AdventOfCode._2023;
 
 public class Day01 : Day
 {

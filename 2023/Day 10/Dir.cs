@@ -1,4 +1,4 @@
-namespace AdventOfCode._2019;
+namespace AdventOfCode._2023;
 
 public enum Dir
 {

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using AdventOfCode.Shared;
 
-namespace AdventOfCode._2019;
+namespace AdventOfCode._2023;
 
 public class Day03 : Day
 {

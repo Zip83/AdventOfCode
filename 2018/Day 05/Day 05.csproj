@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <PackageType>Template</PackageType>
-        <RootNamespace>AdventOfCode._2023</RootNamespace>
+        <RootNamespace>AdventOfCode._2018</RootNamespace>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <ContentTargetFolders>content</ContentTargetFolders>
     </PropertyGroup>

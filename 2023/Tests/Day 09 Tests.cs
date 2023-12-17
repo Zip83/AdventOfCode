@@ -1,7 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace AdventOfCode._2019.Tests;
+namespace AdventOfCode._2023.Tests;
 
 public class Day09Tests
 {
