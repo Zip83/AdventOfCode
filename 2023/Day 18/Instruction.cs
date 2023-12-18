@@ -3,15 +3,11 @@ namespace AdventOfCode._2023;
 public struct Instruction
 {
     public Direction Direction { get; }
-    public int Length { get; }
-    public string Color { get; }
+    public long Length { get; }
 
-    public Instruction(string input)
+    public Instruction(Direction direction, long length)
     {
-        var split = input.Split(" ");
-
-        Direction = Enum.Parse<Direction>(split[0]);
-        Length = int.Parse(split[1]);
-        Color = split[2].Substring(1, split[2].Length - 2);
+        Direction = direction;
+        Length = length;
     }
 }

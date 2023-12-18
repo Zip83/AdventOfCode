@@ -2,8 +2,8 @@ namespace AdventOfCode._2023;
 
 public enum Direction
 {
-    U, // Up
-    D, // Down
-    L, // Left
-    R  // Right
+    U = 3, // Up
+    D = 1, // Down
+    L = 2, // Left
+    R = 0  // Right
 }

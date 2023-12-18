@@ -4,9 +4,6 @@ namespace AdventOfCode._2023;
 
 public class Day18 : Day
 {
-    private const char GroundLevelTerrain = '.';
-    private const char Trench = '#';
-
     public static void Main()
     {
         var instance = new Day18();
@@ -15,185 +12,88 @@ public class Day18 : Day
         Console.WriteLine($"RESULT#2: {instance.GetTask2Result()}");
     }
 
-    private static Instruction[] ParseInput(string[] input)
+    private static List<Instruction> ParseInput(string[] input, bool useColor)
     {
-        return input.Select(line => new Instruction(line)).ToArray();
+        var instructions = new List<Instruction>();
+        foreach (var line in input)
+        {
+            var split = line.Split(" ");
+
+            if (useColor)
+            {
+                var color = split[2].Substring(2, split[2].Length - 3);
+                var length = long.Parse(color[..5], System.Globalization.NumberStyles.HexNumber);
+                var direction = (Direction)int.Parse(color[^1].ToString());
+                instructions.Add(new Instruction(direction, length));
+            }
+            else
+            {
+                var direction = Enum.Parse<Direction>(split[0]);
+                var length = long.Parse(split[1]);
+                instructions.Add(new Instruction(direction, length));
+            }
+        }
+
+        return instructions;
     }
 
-    private (int MinRows, int MaxRows, int MinCols, int MaxCols) FindLagoonSize(IEnumerable<Instruction> instructions)
+    private List<Point> CreatePoints(Instruction[] instructions)
     {
-        var rows = 0;
-        var cols = 0;
-        var maxRows = 0;
-        var maxCols = 0;
-        var minRows = 0;
-        var minCols = 0;
-
+        var points = new List<Point>();
+        var previousPoint = new Point(0, 0);
         foreach (var instruction in instructions)
         {
-            switch (instruction.Direction)
+            var point = instruction.Direction switch
             {
-                case Direction.R:
-                    cols += instruction.Length;
-                    break;
-                case Direction.L:
-                    cols -= instruction.Length;
-                    break;
-                case Direction.D:
-                    rows += instruction.Length;
-                    break;
-                case Direction.U:
-                    rows -= instruction.Length;
-                    break;
-            }
+                Direction.R => new Point(previousPoint.X + instruction.Length, previousPoint.Y),
+                Direction.L => new Point(previousPoint.X - instruction.Length, previousPoint.Y),
+                Direction.D => new Point(previousPoint.X, previousPoint.Y + instruction.Length),
+                _ => new Point(previousPoint.X, previousPoint.Y - instruction.Length)
+            };
 
-            if (cols < minCols)
-            {
-                minCols = cols;
-            }
-            if (rows < minRows)
-            {
-                minRows = rows;
-            }
-            if (cols > maxCols)
-            {
-                maxCols = cols;
-            }
-            if (rows > maxRows)
-            {
-                maxRows = rows;
-            }
+            points.Add(point);
+            previousPoint = point;
         }
 
-        return (minRows, maxRows, minCols, maxCols);
+        return points;
     }
 
-    private static Dictionary<int, Dictionary<int, char>> InitLagoon(int minRows, int maxRows, int minCols, int maxCols)
+    /// <summary>
+    /// The Shoelace Formula https://en.wikipedia.org/wiki/Shoelace_formula - Other formulas
+    /// Area = 0.5 * SUM_i=1^n ( y_i * (x_i-1 - x_i+1) )
+    /// </summary>
+    /// <returns></returns>
+    private long GetPolygonArea(List<Point> points)
     {
-        var lagoon = new Dictionary<int, Dictionary<int, char>>();
-        for (var row = minRows; row <= maxRows; row++)
+        var area = 0L;
+        for (var i = 1; i <= points.Count; i++)
         {
-            lagoon[row] = new Dictionary<int, char>();
-            for (var col = minCols; col <= maxCols; col++)
-            {
-                lagoon[row][col] = GroundLevelTerrain;
-            }
+            var previousPoint = points[(i - 1) % points.Count];
+            var point = points[i % points.Count];
+            var nextPoint = points[(i + 1) % points.Count];
+            area += point.X * (nextPoint.Y - previousPoint.Y);
         }
 
-        return lagoon;
+        return Math.Abs(area) / 2L;
     }
 
-    private void CreateLagoonEdge(IEnumerable<Instruction> instructions, Dictionary<int, Dictionary<int, char>> lagoon)
+    private long GetResult(string[] input, bool useColor)
     {
-        var row = 0;
-        var col = 0;
-        foreach (var instruction in instructions)
-        {
-            switch (instruction.Direction)
-            {
-                case Direction.R:
-                    for (var i = 1; i <= instruction.Length; i++)
-                    {
-                        lagoon[row][col + i] = Trench;
-                    }
+        var instructions = ParseInput(input, useColor).ToArray();
+        var points = CreatePoints(instructions);
 
-                    col += instruction.Length;
-                    break;
-                case Direction.L:
-                    for (var i = 1; i <= instruction.Length; i++)
-                    {
-                        lagoon[row][col - i] = Trench;
-                    }
-
-                    col -= instruction.Length;
-                    break;
-                case Direction.D:
-                    for (var i = 1; i <= instruction.Length; i++)
-                    {
-                        lagoon[row +i][col] = Trench;
-                    }
-
-                    row += instruction.Length;
-                    break;
-                case Direction.U:
-                    for (var i = 1; i <= instruction.Length; i++)
-                    {
-                        lagoon[row - i][col] = Trench;
-                    }
-
-                    row -= instruction.Length;
-                    break;
-            }
-        }
-    }
-
-    private static void PrintLagoon(Dictionary<int, Dictionary<int, char>> lagoon)
-    {
-        foreach (var t in lagoon)
-        {
-            Console.WriteLine(string.Concat(t.Value.Select(pair => pair.Value)));
-        }
-    }
-
-    // 1. Set Q to the empty queue or stack.
-    // 2. Add node to the end of Q.
-    // 3. While Q is not empty:
-    // 4.   Set n equal to the first element of Q.
-    // 5.   Remove first element from Q.
-    // 6.   If n is Inside:
-    // Set the n
-    //     Add the node to the west of n to the end of Q.
-    //     Add the node to the east of n to the end of Q.
-    //     Add the node to the north of n to the end of Q.
-    //     Add the node to the south of n to the end of Q.
-    // 7. Continue looping until Q is exhausted.
-    // 8. Return.
-    private void SeedFill(Dictionary<int, Dictionary<int, char>> lagoon)
-    {
-        var stack = new Stack<(int Row, int Col)>();
-        stack.Push((1, 1));
-        while (stack.Count > 0)
-        {
-            var node = stack.Pop();
-            try
-            {
-                if (lagoon[node.Row][node.Col] == GroundLevelTerrain)
-                {
-                    lagoon[node.Row][node.Col] = Trench;
-                    stack.Push((node.Row, node.Col - 1)); // to west
-                    stack.Push((node.Row, node.Col + 1)); // to east
-                    stack.Push((node.Row - 1, node.Col)); // to north
-                    stack.Push((node.Row + 1, node.Col)); // to south
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-
-        PrintLagoon(lagoon);
-    }
-
-    public override long GetTask1Result(string[] input)
-    {
-        var instructions = ParseInput(input).ToArray();
-        var (minRows, maxRows, minCols, maxCols) = FindLagoonSize(instructions);
-        var lagoon = InitLagoon(minRows, maxRows, minCols, maxCols);
-
-        CreateLagoonEdge(instructions, lagoon);
-        PrintLagoon(lagoon);
-        Console.WriteLine($"Lagoon edge size: {lagoon.Sum(row => row.Value.Sum(col => col.Value == Trench ? 1 : 0))}");
-
-        SeedFill(lagoon);
-        PrintLagoon(lagoon);
-        var lagoonSize = lagoon.Sum(row => row.Value.Sum(col => col.Value == Trench ? 1 : 0));
+        var lagoonSize = GetPolygonArea(points) + instructions.Sum(instruction => instruction.Length) / 2 + 1;
         Console.WriteLine($"Lagoon total size: {lagoonSize}");
         return lagoonSize;
     }
 
+    public override long GetTask1Result(string[] input)
+    {
+        return GetResult(input, false);
+    }
+
     public override long GetTask2Result(string[] input)
     {
-        throw new NotImplementedException();
+        return GetResult(input, true);
     }
 }
