@@ -88,7 +88,7 @@ public class Day23 : Day
         while (stack.Any())
         {
             (var currentPoint, var lenght, visitedPoints) = stack.Pop();
-            if (!IsValidPoint(map, currentPoint))
+            if (!IsValidPoint(ref map, currentPoint))
             {
                 continue;
             }
@@ -152,19 +152,22 @@ public class Day23 : Day
         }
         Console.WriteLine();
     }
+    
+    string RemoveSlopes(string st) =>
+        string.Join("", st.Select(ch => ">v<^".Contains(ch) ? '.' : ch));
 
     public override long GetTask2Result(string[] input)
     {
-        throw new NotImplementedException();
+        return GetTask1Result(input.Select(RemoveSlopes).ToArray());
     }
 
-    private static bool IsValidPoint(HikingTrail[][] map, Point point)
+    private static bool IsValidPoint(ref HikingTrail[][] map, Point point)
     {
         if (point.X < 0 || point.X >= map.Length)
         {
             return false;
         }
 
-        return point.Y >= 0 && point.Y < map[0].Length;
+        return point.Y >= 0 && point.Y < map[0].Length && map[point.X][point.Y] != HikingTrail.Forest;
     }
 }
