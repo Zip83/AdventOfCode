@@ -71,88 +71,174 @@ public class Day23 : Day
         return col;
     }
 
+    private Graph CreateGraph(HikingTrail[][] map, Point starOfPath, Point endOfPath)
+    {
+        var graph = new Graph();
+        graph.AddNode(starOfPath);
+        for (var row = 0; row < map.Length; row++)
+        {
+            for (var col = 0; col < map[row].Length; col++)
+            {
+                var point = new Point(row, col);
+                var hikingTrail = map[row][col];
+                if (hikingTrail == HikingTrail.Forest)
+                {
+                    continue;
+                }
+
+                var adjacent = 0;
+                foreach (var (_, d) in Direction)
+                {
+                    var newPoint = point + d;
+                    if (IsValidPoint(ref map, newPoint))
+                    {
+                        adjacent++;
+                    }
+                }
+
+                if (adjacent > 2)
+                {
+                    graph.AddNode(point);
+                }
+            }
+        }
+
+        graph.AddNode(endOfPath);
+        // foreach (var (node, _) in graph.Nodes)
+        // {
+        //     Console.WriteLine(node);
+        // }
+
+        foreach (var (from, _) in graph.Nodes)
+        {
+            foreach (var (to, _) in graph.Nodes)
+            {
+                if (from == to)
+                {
+                    continue;
+                }
+                
+                var pathVisited = new HashSet<Point>();
+                var stack = new Stack<(Point Node, int Length)>();
+                stack.Push((from, 0));
+                while (stack.Count > 0)
+                {
+                    var (node, length) = stack.Pop();
+                    pathVisited.Add(node);
+                    if (graph.Nodes.ContainsKey(node) && node != from)
+                    {
+                        if (node == to)
+                        {
+                            graph.AddEdge(from, to, length);
+                            break;
+                        }
+                        continue;
+                    }
+
+                    var hikingTrail = map[node.X][node.Y];
+                    var direction = hikingTrail == HikingTrail.Path
+                        ? Direction
+                        : new Dictionary<HikingTrail, Point>
+                        {
+                            { hikingTrail, Direction[hikingTrail] }
+                        };
+
+                    foreach (var (_, d) in direction)
+                    {
+                        var newPoint = node + d;
+                        if (!IsValidPoint(ref map, newPoint) || pathVisited.Contains(newPoint))
+                        {
+                            continue;
+                        }
+
+                        stack.Push((newPoint, length + 1));
+                    }
+                }
+            }
+        }
+
+        // foreach (var ((from, to), weight) in graph.Edges)
+        // {
+        //     Console.WriteLine($"{from} => {to} >> {weight}");
+        // }
+
+        return graph;
+    }
+
+    private void DFS(Graph graph, Point u, Point v)
+    {
+        if (_visited.Contains(u))
+        {
+            return;
+        }
+
+        _visited.Add(u);
+        _currentPath.Add(u);
+
+        if (u == v)
+        {
+            _simplePaths.Add(_currentPath.ToArray());
+            _visited.Remove(u);
+            _currentPath.RemoveAt(_currentPath.Count - 1); // remove from back
+            return;
+        }
+
+        foreach (var next in graph.Nodes[u])
+        {
+            DFS(graph, next, v);
+        }
+
+        _currentPath.RemoveAt(_currentPath.Count - 1); // remove from back
+        _visited.Remove(u);
+    }
+
+    private readonly HashSet<Point> _visited = new();
+    private readonly List<Point> _currentPath = new();
+    private readonly List<Point[]> _simplePaths = new();
+
     public override long GetTask1Result(string[] input)
     {
         var map = ParseInput(input);
         var starOfPath = FindStartOfPath(ref map);
         var endOfPath = FindEndOfPath(ref map);
 
-        var trailLength = 1;
+        var graph = CreateGraph(map, starOfPath, endOfPath);
+        _visited.Clear();
+        _currentPath.Clear();
+        _simplePaths.Clear();
+        DFS(graph, starOfPath, endOfPath);
 
-        // point for inspection, length to the point, list of visited points
-        var stack = new Stack<(Point, int, HikingTrail[][])>();
-       
-        var visitedPoints = Copy(map);
-
-        stack.Push((starOfPath + Direction[HikingTrail.SlopeDown], 1, visitedPoints));
-        while (stack.Any())
+        var maxLength = 0;
+        foreach (var path in _simplePaths)
         {
-            (var currentPoint, var lenght, visitedPoints) = stack.Pop();
-            if (!IsValidPoint(ref map, currentPoint))
+            if (!path.Any())
             {
-                continue;
+                break;
             }
 
-            if (visitedPoints[currentPoint.X][currentPoint.Y] == HikingTrail.Visited)
-            {
-                continue; // already visited, every point can be visited only once
-            }
+            var pathLength = 0;
+            var node = path.First();
 
-            if (currentPoint == endOfPath)
+            foreach (var next in path.Skip(1))
             {
-                if (lenght > trailLength)
+                pathLength += graph.Edges[(node, next)];
+                if (next == endOfPath)
                 {
-                    trailLength = lenght;
-                    PrintHikingTrail(visitedPoints);
+                    if (pathLength > maxLength)
+                    {
+                        maxLength = pathLength;
+                    }
+
+                    break;
                 }
 
-                continue;
-            }
-
-            visitedPoints[currentPoint.X][currentPoint.Y] = HikingTrail.Visited;
-            switch (map[currentPoint.X][currentPoint.Y])
-            {
-                case HikingTrail.Forest:
-                case HikingTrail.Visited:
-                    continue;
-                case HikingTrail.Path:
-                    stack.Push((currentPoint + Direction[HikingTrail.SlopeDown], lenght + 1, Copy(visitedPoints)));
-                    stack.Push((currentPoint + Direction[HikingTrail.SlopeRight], lenght + 1, Copy(visitedPoints)));
-                    stack.Push((currentPoint + Direction[HikingTrail.SlopeLeft], lenght + 1, Copy(visitedPoints)));
-                    stack.Push((currentPoint + Direction[HikingTrail.SlopeUp], lenght + 1, Copy(visitedPoints)));
-                    break;
-                default:
-                    var hikingTrail = map[currentPoint.X][currentPoint.Y];
-                    stack.Push((currentPoint + Direction[hikingTrail], lenght + 1, Copy(visitedPoints)));
-                    break;
+                node = next;
             }
         }
 
-        return trailLength;
+        return maxLength;
     }
 
-    private static HikingTrail[][] Copy(HikingTrail[][] map)
-    {
-        var copy = new HikingTrail[map.Length][];
-        for (var i = 0; i < map.Length; i++)
-        {
-            var line = map[i];
-            copy[i] = new HikingTrail[line.Length];
-            Array.Copy(line, copy[i], line.Length);
-        }
-
-        return copy;
-    }
-
-    private static void PrintHikingTrail(HikingTrail[][] map)
-    {
-        foreach (var line in map)
-        {
-            Console.WriteLine(string.Join("", line.Select(i => (char)(int)i).ToList()));
-        }
-        Console.WriteLine();
-    }
-    
     string RemoveSlopes(string st) =>
         string.Join("", st.Select(ch => ">v<^".Contains(ch) ? '.' : ch));
 
