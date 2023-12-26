@@ -1,6 +1,6 @@
 ﻿using AdventOfCode.Shared;
 
-namespace AdventOfCode._2019;
+namespace AdventOfCode._2023;
 
 public class Day15 : Day
 {
@@ -12,9 +12,24 @@ public class Day15 : Day
         Console.WriteLine($"RESULT#2: {instance.GetTask2Result()}");
     }
 
+    public static int Hash(string str)
+    {
+        var hash = 0;
+        foreach (var c in str)
+        {
+            var asciiCode = (int)c; // Determine the ASCII code for the current character of the string
+            hash += asciiCode; // Increase the current value by the ASCII code you just determined
+            hash *= 17; // Set the current value to itself multiplied by 17.
+            hash %= 256; // Set the current value to the remainder of dividing itself by 256.
+        }
+
+        return hash;
+    }
+
     public override long GetTask1Result(string[] input)
     {
-        throw new NotImplementedException();
+        var line = input.First();
+        return line.Split(",").Sum(Hash);
     }
 
     public override long GetTask2Result(string[] input)
