@@ -23,6 +23,28 @@ public class Day01 : Day
 
     public override long GetTask2Result(string[] input)
     {
-        throw new NotImplementedException();
+        var floor = 0;
+        var line = input.First();
+        int position;
+        for (position = 0; position < line.Length; position++)
+        {
+            var c = line[position];
+            switch (c)
+            {
+                case '(':
+                    floor++;
+                    break;
+                case ')':
+                    floor--;
+                    break;
+            }
+
+            if (floor == -1)
+            {
+                break;
+            }
+        }
+
+        return position + 1;
     }
 }

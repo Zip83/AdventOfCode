@@ -18,4 +18,12 @@ public class Day01Tests
         var day = new Day01();
         return day.GetTask1Result(new [] {input});
     }
+    
+    [TestCase(")", ExpectedResult = 1)]
+    [TestCase("()())", ExpectedResult = 5)]
+    public long GetTask2ResultTest(string input)
+    {
+        var day = new Day01();
+        return day.GetTask2Result(new [] {input});
+    }
 }
