@@ -14,7 +14,11 @@ public class Day01 : Day
 
     public override long GetTask1Result(string[] input)
     {
-        throw new NotImplementedException();
+        var line = input.First();
+        var up = line.Count(c => c == '(');
+        var down = line.Count(c => c == ')');
+
+        return up - down;
     }
 
     public override long GetTask2Result(string[] input)
